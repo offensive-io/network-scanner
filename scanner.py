@@ -1,5 +1,6 @@
 import socket
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
 
 target = input("Enter target IP: ")
 start_port = int(input("Enter start port: "))
@@ -10,7 +11,7 @@ print("Scan started at:", datetime.now())
 
 open_ports = []
 
-for port in range(start_port, end_port + 1):
+def scan_port(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     socket.setdefaulttimeout(0.5)
     
@@ -21,6 +22,9 @@ for port in range(start_port, end_port + 1):
         open_ports.append(port)
     
     s.close()
+
+with ThreadPoolExecutor(max_workers=100) as executor:
+    executor.map(scan_port, range(start_port, end_port + 1))
 
 print("\nScan complete.")
 print(f"Open ports: {open_ports}")
